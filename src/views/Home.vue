@@ -1,18 +1,31 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+    <main>
+        <h1 id="who">Who</h1>
+        <p>Lucien，拉丁文，寓意真理，苹果粉，码农</p>
+        <h1 id="hobby">Hobby</h1>
+        <p>女朋友，唱歌，吉他，钢琴，小提琴，敲代码，数码产品</p>
+        <h1 id="intro">Intro</h1>
+        <p>无名之辈，湖北襄阳人许。</p>
+        <br/>
+        <p>修于新，至舞象之年。升学青岛，野心颇多，而力不能及。</p>
+        <p>遂迷茫，吃喝玩乐，废时颇多，悔不当初。</p>
+        <br/>
+        <p>初至青岛，视野颇开，欲专于曲乐，遂弃课业不顾。写曲弹弦，尽惹啼笑，卖唱半载，混迹苟活。</p>
+        <br/>
+        <p>奈何生而为人，尝八苦，铸大错，遂整日闭门黄粱梦，终婆娑请辞。以《莉莉安》一曲为终，不闻乐，不语歌，尔后至今。</p>
+        <p>幸遇伯乐，推至上，众人划桨，披荆斩棘不惊。山前得势，山后迷惘。</p>
+        <p>奈何妖魔鬼怪，其间琐事颇多，郁郁半载，寻医问药略有成。后遇有心人，然，负之，再遇贵人，伴随至今。</p>
+        <br/>
+        <p>寻路甚久，起伏不定。惶惶终日，不懂文言分毫，画文于此。</p>
+        <br/>
+        <p>终不得愿，抱憾终生。</p>
+    </main>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
 
-export default {
-  name: 'home',
-  components: {
-    HelloWorld
-  }
-}
 </script>
+
+<style scoped>
+
+</style>
