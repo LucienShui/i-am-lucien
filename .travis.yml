@@ -32,4 +32,4 @@ notifications:
 env:
   global:
     - GH_REF: github.com/LucienShui/PasteMe.git
-    - P_BRANCH: build
+    - P_BRANCH: master
