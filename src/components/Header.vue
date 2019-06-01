@@ -3,9 +3,10 @@
         <div class="menu">
             <ul>
                 <li><router-link to="/">/</router-link></li>
-                <li><a href="https://blog.lucien.ink/" target="_blank">/blog</a></li>
-                <li><a href="https://blog.lucien.ink/friends.html" target="_blank">/friends</a></li>
-                <li><a href="https://pasteme.cn/" target="_blank">/pasteme</a></li>
+                <li><router-link to="/intro">/intro</router-link></li>
+                <li><router-link to="/friends">/friends</router-link></li>
+                <li><router-link to="/blog">/blog</router-link></li>
+                <li><router-link to="/pasteme">/pasteme</router-link></li>
             </ul>
         </div>
     </header>
