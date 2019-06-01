@@ -1,4 +1,6 @@
-# homepage
+# I'm Lucien
+
+This project build for the personal homepage based on https://github.com/b2a3e8/jekyll-theme-console
 
 ## Project setup
 ```
