@@ -26,10 +26,5 @@ branches:
 
 notifications:
   email:
-    - lucien@lucien.ink
+    - ${U_EMAIL}
   on_failure: always
-
-env:
-  global:
-    - GH_REF: github.com/LucienShui/PasteMe.git
-    - P_BRANCH: master
