@@ -10,10 +10,14 @@
     <img src="https://img.shields.io/eclipse-marketplace/l/notepad4e.svg" alt="">
   </a>
   <a>
-    <img src="https://img.shields.io/badge/version-0.1.0-brightgreen.svg" alt="version">
+    <img src="https://img.shields.io/badge/version-0.1.1-brightgreen.svg" alt="version">
   </a>
 </p>
 
 ## Deploy
 
-Drag files into web root
+Drag files into web root.
+
+## Modify
+
+If you want to modify the page, please fork and modify the [source branch](./tree/source), then build it.

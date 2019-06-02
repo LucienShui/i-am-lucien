@@ -6,6 +6,9 @@
         <p>女朋友，唱歌，吉他，钢琴，小提琴，敲代码，数码产品</p>
         <h1 id="school">School</h1>
         <p>中国石油大学（华东）</p>
+        <br/>
+        <p>PS：原 Lucien's Blog (lucien.ink)，已转移至：<a
+                href="https://blog.lucien.ink" target="_blank">blog.lucien.ink</a></p>
     </main>
 </template>
 
