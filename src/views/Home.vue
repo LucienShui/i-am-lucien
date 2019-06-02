@@ -7,7 +7,7 @@
         <h1 id="school">School</h1>
         <p>中国石油大学（华东）</p>
         <br/>
-        <p>PS：原 Lucien's Blog (lucien.ink)，已转移至：<a
+        <p>PS：原技术博客 Lucien's Blog (lucien.ink)，已迁至：<a
                 href="https://blog.lucien.ink" target="_blank">blog.lucien.ink</a></p>
     </main>
 </template>
