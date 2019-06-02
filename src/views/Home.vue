@@ -4,6 +4,8 @@
         <p>Lucien，拉丁文，寓意真理，苹果粉，码农</p>
         <h1 id="hobby">Hobby</h1>
         <p>女朋友，唱歌，吉他，钢琴，小提琴，敲代码，数码产品</p>
+        <h1 id="school">School</h1>
+        <p>中国石油大学（华东）</p>
     </main>
 </template>
 
