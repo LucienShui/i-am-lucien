@@ -20,4 +20,4 @@ Drag files into web root.
 
 ## Modify
 
-If you want to modify the page, please fork and modify the [source branch](./tree/source), then build it.
+If you want to modify the page, please fork and modify the [source branch](../../tree/source), then build it.
