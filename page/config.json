@@ -1,0 +1,10 @@
+{
+    "footer": "/page/footer.html",
+    "header": {
+        "/": "/page/main.html",
+        "/intro": "/page/intro.html",
+        "/friend": "/page/friend.html",
+        "/blog": "/page/blog.html",
+        "/project": "/page/project.html"
+    }
+}
