@@ -1,0 +1,17 @@
+name: Trigger Webhook
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+
+  release:
+    name: Trigger Webhook
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Webhook
+        run: |
+          curl -X POST "${{ secrets.WEBHOOK }}"

@@ -3,7 +3,7 @@
     "header": {
         "/": "/page/main.html",
         "/intro": "/page/intro.html",
-        "/friend": "/page/friend.html",
+        "/music": "/page/music.html",
         "/blog": "/page/blog.html",
         "/project": "/page/project.html"
     }
