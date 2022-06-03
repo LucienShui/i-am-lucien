@@ -64,13 +64,21 @@
         appendMessage(text, 1);
         input.value = '';
 
-        /*
-        post(config['chat']['api'], {'text': text}).then(response => {
-            appendMessage(response.answer, 0);
-        })
-        */
+        if ('chat' in config && 'api' in config['chat'] && config['chat']['api']) {
+            post(config['chat']['api'], {'text': text}).then(response => {
+                appendMessage(response.answer, 0);
+            })
+        }
+        
         
         event.preventDefault();
+    }
+
+    function focusInput() {
+        let hashKey = currentContentKey();
+        if (hashKey === '/chat') {
+            document.getElementById('chat-text').focus();
+        }
     }
 
     (function () {
@@ -78,5 +86,7 @@
         form.addEventListener('submit', submit);
 
         appendMessage('如果一个机器人知我所知，想我所想，那他是否可以成为我。', 0);
+
+        window.addEventListener('hashchange', focusInput);
     })()
 </script>

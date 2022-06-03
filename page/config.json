@@ -9,6 +9,6 @@
         "/chat": "/page/chat.html"
     },
     "chat": {
-        "api": "http://localhost:3000/chat"
+        "api": "/api/chat"
     }
 }

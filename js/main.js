@@ -1,5 +1,7 @@
 let globalCache = {};
 let config = null;
+let divMap = {};
+let currentHashKey = null;
 
 function currentContentKey() {
     return location.hash === '' ? '/' : location.hash.substring(1);
@@ -36,8 +38,14 @@ function updateContent() {
         return null;
     }
 
-    if (hashKey in globalCache) {
-        document.getElementById('container-content').innerHTML = globalCache[hashKey];
+    if (currentHashKey !== null && currentHashKey in divMap) {
+        divMap[currentHashKey].hidden = true;
+    }
+    currentHashKey = hashKey;
+
+    if (hashKey in divMap) {
+        // document.getElementById('container-content').innerHTML = globalCache[hashKey];
+        divMap[hashKey].hidden = false;
         setHeaderAndFooter();
     } else {
         let url = config['header'][hashKey];
@@ -45,13 +53,21 @@ function updateContent() {
             response => {
                 // let hashKey = currentContentKey();
                 innerHTML = response.data;
+                let div = document.createElement('div');
+                div.innerHTML = innerHTML;
+
+                divMap[hashKey] = div;
                 globalCache[hashKey] = innerHTML;
 
                 let containerContent = document.getElementById('container-content');
-                containerContent.innerHTML = globalCache[hashKey];
+                containerContent.appendChild(div);
+
+                currentHashKey = hashKey;
+                
+                // containerContent.innerHTML = globalCache[hashKey];
                 setHeaderAndFooter();
 
-                let scriptList = Array.prototype.slice.call(containerContent.getElementsByTagName('script'));
+                let scriptList = Array.prototype.slice.call(div.getElementsByTagName('script'));
                 scriptList.forEach(function (script) { eval(script.innerHTML); });
             }
         )
@@ -90,6 +106,16 @@ function updateContent() {
                                 response => {
                                     innerHTML = response.data;
                                     globalCache[key] = innerHTML;
+                                    
+                                    let div = document.createElement('div');
+
+                                    div.innerHTML = innerHTML;
+                                    div.hidden = true;
+
+                                    divMap[key] = div;
+
+                                    let containerContent = document.getElementById('container-content');
+                                    containerContent.appendChild(div);
                                 }
                             )
                         }
