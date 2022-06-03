@@ -1,18 +1,9 @@
-let globalCache = {};
 let config = null;
 let divMap = {};
-let currentHashKey = null;
+let currentkey = null;
 
 function currentContentKey() {
     return location.hash === '' ? '/' : location.hash.substring(1);
-}
-
-function setHeaderAndFooter() {
-    let footerDOM = document.getElementById('container-footer');
-    if (footerDOM.innerHTML === '') {
-        footerDOM.innerHTML = globalCache['footer'];
-        document.getElementById('container-header').innerHTML = globalCache['header'];
-    }
 }
 
 function get(url) {
@@ -32,40 +23,33 @@ function post(url, params = {}, headers = {'Accept': 'application/json'}) {
 }
 
 function updateContent() {
-    let hashKey = currentContentKey();
-    if (!(hashKey in config['header'])) {
+    let key = currentContentKey();
+    if (!(key in config['header'])) {
         location.hash = '#/';
         return null;
     }
 
-    if (currentHashKey !== null && currentHashKey in divMap) {
-        divMap[currentHashKey].hidden = true;
+    if (currentkey !== null && currentkey in divMap) {
+        divMap[currentkey].hidden = true;
     }
-    currentHashKey = hashKey;
+    currentkey = key;
 
-    if (hashKey in divMap) {
-        // document.getElementById('container-content').innerHTML = globalCache[hashKey];
-        divMap[hashKey].hidden = false;
-        setHeaderAndFooter();
+    if (key in divMap) {
+        divMap[key].hidden = false;
     } else {
-        let url = config['header'][hashKey];
+        let url = config['header'][key];
         axios.get(url).then(
             response => {
-                // let hashKey = currentContentKey();
                 innerHTML = response.data;
                 let div = document.createElement('div');
                 div.innerHTML = innerHTML;
 
-                divMap[hashKey] = div;
-                globalCache[hashKey] = innerHTML;
+                divMap[key] = div;
 
                 let containerContent = document.getElementById('container-content');
                 containerContent.appendChild(div);
 
-                currentHashKey = hashKey;
-                
-                // containerContent.innerHTML = globalCache[hashKey];
-                setHeaderAndFooter();
+                currentkey = key;
 
                 let scriptList = Array.prototype.slice.call(div.getElementsByTagName('script'));
                 scriptList.forEach(function (script) { eval(script.innerHTML); });
@@ -88,15 +72,15 @@ function updateContent() {
             axios.get(footerUrl).then(
                 response => {
                     let footerHtml = response.data;
-                    globalCache['footer'] = footerHtml;
 
                     let headerHtml = '<header><div class="menu"><ul>';
                     for (let key in config['header']) {
                         headerHtml += '<li>' + '<a href="#' + key + '">' + key +  "</a>" +  '</li>';
                     }
                     headerHtml += '</ul></div></header>'
-                    globalCache['header'] = headerHtml;
 
+                    document.getElementById('container-footer').innerHTML = footerHtml;
+                    document.getElementById('container-header').innerHTML = headerHtml;
                     updateContent();
 
                     for (let key in config['header']) {
@@ -105,7 +89,6 @@ function updateContent() {
                             axios.get(url).then(
                                 response => {
                                     innerHTML = response.data;
-                                    globalCache[key] = innerHTML;
                                     
                                     let div = document.createElement('div');
 
