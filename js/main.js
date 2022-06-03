@@ -13,31 +13,52 @@ function setHeaderAndFooter() {
     }
 }
 
+function get(url) {
+    return new Promise((resolve, reject) => {
+        axios.get(url).then(response => {
+            resolve(response.data);
+        })
+    });
+}
+
+function post(url, params = {}, headers = {'Accept': 'application/json'}) {
+    return new Promise((resolve, reject) => {
+        axios.post(url, params, headers).then(response => {
+            resolve(response.data);
+        })
+    });
+}
+
 function updateContent() {
-    let outerHashKey = currentContentKey();
-    if (!(outerHashKey in config['header'])) {
+    let hashKey = currentContentKey();
+    if (!(hashKey in config['header'])) {
         location.hash = '#/';
         return null;
     }
 
-    if (outerHashKey in globalCache) {
-        document.getElementById('container-content').innerHTML = globalCache[outerHashKey];
+    if (hashKey in globalCache) {
+        document.getElementById('container-content').innerHTML = globalCache[hashKey];
         setHeaderAndFooter();
     } else {
-        let url = config['header'][outerHashKey];
+        let url = config['header'][hashKey];
         axios.get(url).then(
             response => {
-                let innerHashKey = currentContentKey();
+                // let hashKey = currentContentKey();
                 innerHTML = response.data;
-                globalCache[innerHashKey] = innerHTML;
-                document.getElementById('container-content').innerHTML = globalCache[innerHashKey];
+                globalCache[hashKey] = innerHTML;
+
+                let containerContent = document.getElementById('container-content');
+                containerContent.innerHTML = globalCache[hashKey];
                 setHeaderAndFooter();
+
+                let scriptList = Array.prototype.slice.call(containerContent.getElementsByTagName('script'));
+                scriptList.forEach(function (script) { eval(script.innerHTML); });
             }
         )
     }
 }
 
-function main() {
+(function () {
     if (location.hash === '') {
         location.hash = '#/'
     }
@@ -79,6 +100,4 @@ function main() {
             )
         }
     )
-}
-
-main();
+})();

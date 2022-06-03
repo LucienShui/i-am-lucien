@@ -5,6 +5,10 @@
         "/intro": "/page/intro.html",
         "/music": "/page/music.html",
         "/blog": "/page/blog.html",
-        "/project": "/page/project.html"
+        "/project": "/page/project.html",
+        "/chat": "/page/chat.html"
+    },
+    "chat": {
+        "api": "http://localhost:3000/chat"
     }
 }
