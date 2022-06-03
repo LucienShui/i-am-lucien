@@ -38,23 +38,20 @@ function updateContent() {
         divMap[key].hidden = false;
     } else {
         let url = config['header'][key];
-        axios.get(url).then(
-            response => {
-                innerHTML = response.data;
-                let div = document.createElement('div');
-                div.innerHTML = innerHTML;
+        get(url).then(response => {
+            let div = document.createElement('div');
+            div.innerHTML = response;
 
-                divMap[key] = div;
+            divMap[key] = div;
 
-                let containerContent = document.getElementById('container-content');
-                containerContent.appendChild(div);
+            let containerContent = document.getElementById('container-content');
+            containerContent.appendChild(div);
 
-                currentkey = key;
+            currentkey = key;
 
-                let scriptList = Array.prototype.slice.call(div.getElementsByTagName('script'));
-                scriptList.forEach(function (script) { eval(script.innerHTML); });
-            }
-        )
+            let scriptList = Array.prototype.slice.call(div.getElementsByTagName('script'));
+            scriptList.forEach(function (script) { eval(script.innerHTML); });
+        })
     }
 }
 
@@ -63,50 +60,40 @@ function updateContent() {
         location.hash = '#/'
     }
 
-    axios.get('/page/config.json').then(
-        response => {
-            config = response.data;
+    get('/page/config.json').then(response => {
+        config = response;
 
-            let footerUrl = config['footer'];
+        let footerUrl = config['footer'];
 
-            axios.get(footerUrl).then(
-                response => {
-                    let footerHtml = response.data;
+        get(footerUrl).then(response => {
+            let headerHtml = '<header><div class="menu"><ul>';
+            for (let key in config['header']) {
+                headerHtml += '<li>' + '<a href="#' + key + '">' + key +  "</a>" +  '</li>';
+            }
+            headerHtml += '</ul></div></header>'
+            
+            document.getElementById('container-header').innerHTML = headerHtml;
+            document.getElementById('container-footer').innerHTML = response;
+            updateContent();
 
-                    let headerHtml = '<header><div class="menu"><ul>';
-                    for (let key in config['header']) {
-                        headerHtml += '<li>' + '<a href="#' + key + '">' + key +  "</a>" +  '</li>';
-                    }
-                    headerHtml += '</ul></div></header>'
+            for (let key in config['header']) {
+                if (key !== currentContentKey()) {
+                    let url = config['header'][key];
+                    get(url).then(response => {
+                        let div = document.createElement('div');
 
-                    document.getElementById('container-footer').innerHTML = footerHtml;
-                    document.getElementById('container-header').innerHTML = headerHtml;
-                    updateContent();
+                        div.innerHTML = response;
+                        div.hidden = true;
 
-                    for (let key in config['header']) {
-                        if (key !== currentContentKey()) {
-                            let url = config['header'][key];
-                            axios.get(url).then(
-                                response => {
-                                    innerHTML = response.data;
-                                    
-                                    let div = document.createElement('div');
+                        divMap[key] = div;
 
-                                    div.innerHTML = innerHTML;
-                                    div.hidden = true;
-
-                                    divMap[key] = div;
-
-                                    let containerContent = document.getElementById('container-content');
-                                    containerContent.appendChild(div);
-                                }
-                            )
-                        }
-                    }
-
-                    window.addEventListener('hashchange', updateContent);
+                        let containerContent = document.getElementById('container-content');
+                        containerContent.appendChild(div);
+                    })
                 }
-            )
-        }
-    )
+            }
+
+            window.addEventListener('hashchange', updateContent);
+        })
+    })
 })();
