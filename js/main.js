@@ -1,5 +1,6 @@
 let config = null;
 let divMap = {};
+let scriptListMap = {};
 let currentkey = null;
 
 function currentContentKey() {
@@ -36,6 +37,10 @@ function updateContent() {
 
     if (key in divMap) {
         divMap[key].hidden = false;
+        if (key in scriptListMap) {
+            scriptListMap[key].forEach(function (script) { eval(script.innerHTML); });
+            delete scriptListMap[key];
+        }
     } else {
         let url = config['header'][key];
         get(url).then(response => {
@@ -89,6 +94,9 @@ function updateContent() {
 
                         let containerContent = document.getElementById('container-content');
                         containerContent.appendChild(div);
+
+                        let scriptList = Array.prototype.slice.call(div.getElementsByTagName('script'));
+                        scriptListMap[key] = scriptList;
                     })
                 }
             }
