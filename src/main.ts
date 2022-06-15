@@ -1,27 +1,69 @@
-import {createApp} from 'vue'
+import {createApp, InjectionKey} from 'vue'
 import {createRouter, createWebHashHistory} from 'vue-router'
+import {createStore} from 'vuex'
+import axios from 'axios'
+import VueAxios from "vue-axios";
+import {State, key, Config} from './store'
 import App from './App.vue'
 import Chat from './components/Chat.vue'
-import Home from './components/Home.vue'
+import DynamicPage from './components/DynamicPage.vue'
+import NotFound from "./components/NotFound.vue";
 
-const routes = [
-    {
-        path: '/chat',
-        component: Chat
-    },
-    {
-        path: '/',
-        component: Home
-    }
-]
+axios.get('/page/config.json').then(response => {
+    let config: Config = response.data;
 
-const router = createRouter({
-    history: createWebHashHistory(),
-    routes: routes
-});
+    const store = createStore<State>({
+        state: function () {
+            return {
+                config: config,
+                cache: {}
+            }
+        },
+        mutations: {
+            put: function (state: State, payload) {
+                let namespace: string = payload.namespace;
+                let key: string = payload.key;
+                let value: any = payload.value;
+                if (!(namespace in store.state.cache)) {
+                    store.state.cache[namespace] = {};
+                }
+                store.state.cache[namespace][key] = value;
+            }
+        }
+    });
 
-const app = createApp(App);
+    let pattern = config.header.map(page => page.url.substring(1)).join('|');
 
-app.use(router);
+    const routes = [
+        {
+            path: '/chat',
+            name: 'Chat',
+            component: Chat
+        },
+        {
+            path: `/:page(${pattern === '' ? '|' : pattern})`,
+            name: 'DynamicPage',
+            component: DynamicPage
+        },
+        {
+            path: '/:notFoundPath(.*)*',
+            name: 'NotFound',
+            component: NotFound
+        }
+    ]
 
-app.mount('#app');
+    const router = createRouter({
+        history: createWebHashHistory(),
+        routes: routes
+    });
+
+    const app = createApp(App);
+
+    app.use(router);
+    app.use(store, key);
+    app.use(VueAxios, axios);
+
+    app.mount('#app');
+})
+
+

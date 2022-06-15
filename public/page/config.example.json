@@ -1,0 +1,11 @@
+{
+    "header": [
+        {
+            "url": "/",
+            "path": "/page/example.html"
+        }
+    ],
+    "chat": {
+        "api": ""
+    }
+}
