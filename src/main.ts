@@ -1,9 +1,9 @@
-import {createApp, InjectionKey} from 'vue'
+import {createApp} from 'vue'
 import {createRouter, createWebHashHistory} from 'vue-router'
 import {createStore} from 'vuex'
 import axios from 'axios'
 import VueAxios from "vue-axios";
-import {State, key, Config} from './store'
+import {Config, key, State} from './store'
 import App from './App.vue'
 import Chat from './components/Chat.vue'
 import DynamicPage from './components/DynamicPage.vue'

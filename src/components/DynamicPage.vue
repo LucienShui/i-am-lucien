@@ -16,7 +16,7 @@ export default defineComponent({
         return {
             store: useStore(),
             config: {} as Config,
-            page: {} as {[key: string]: string},
+            page: {} as { [key: string]: string },
             html: ''
         }
     },
@@ -49,7 +49,9 @@ export default defineComponent({
             }
         },
         updatePageCallback: function (html: string) {
-            this.html = html;
+            if (this.html !== html) {
+                this.html = html;
+            }
         }
     },
     watch: {
@@ -63,7 +65,8 @@ export default defineComponent({
             this.page[page.url] = page.path;
         }
         this.loadPage(`/${this.$route.params.page}`, this.updatePageCallback);
-        this.config.header.forEach(page => this.loadPage(page.url, function () {}))
+        this.config.header.forEach(page => this.loadPage(page.url, function () {
+        }))
     }
 });
 </script>

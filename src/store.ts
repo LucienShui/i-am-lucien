@@ -1,5 +1,5 @@
 import {InjectionKey} from 'vue'
-import {useStore as baseUseStore, Store} from 'vuex'
+import {Store, useStore as baseUseStore} from 'vuex'
 
 export interface Config {
     header: Array<{ url: string, path: string }>,

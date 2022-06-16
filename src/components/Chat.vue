@@ -18,6 +18,7 @@
 
 <script lang="ts">
 import {defineComponent} from "vue";
+import {Config, useStore} from "../store";
 
 class Message {
     public text: string;
@@ -67,10 +68,13 @@ export default defineComponent({
             text: '' as string,
             messageList: new Array<Message>(),
             helloWorld: '如果一个机器人知我所知，想我所想，那他是否可以成为我。' as string,
-            messageBox: document.createElement('div') as HTMLElement
+            messageBox: document.createElement('div') as HTMLElement,
+            config: {} as Config
         };
     },
     mounted: function () {
+        this.config = useStore().state.config;
+
         this.messageBox = this.$refs["message-box"] as HTMLElement
         this.messageList = messageStorage.fetch();
         if (this.messageList.length === 0 || this.messageList[this.messageList.length - 1].text !== this.helloWorld) {
@@ -90,8 +94,13 @@ export default defineComponent({
     methods: {
         submit: function (event: Event) {
             if (this.text !== '') {
-                this.appendMessage(this.text, 1);
+                let text = this.text;
                 this.text = '';
+
+                this.appendMessage(text, 1);
+                this.axios.post(this.config.chat.api, {'text': text}).then(response => response.data).then(response => {
+                    this.appendMessage(response.answer, 0);
+                })
             }
             event.preventDefault();
         },
@@ -108,6 +117,8 @@ export default defineComponent({
     background-color: black;
     color: #DBDBDB;
     caret-color: #DBDBDB;
+    font-family: "Source Code Pro", monospace;
+    font-size: 12.5px;
 }
 
 .chat-input > span {
