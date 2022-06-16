@@ -1,0 +1,49 @@
+name: Build and Upload
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: pnpm/action-setup@v2
+      with:
+        version: 7
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'pnpm'
+    - run: pnpm install --frozen-lockfile
+    - run: pnpm build
+
+    - name: Release Version
+      id: release_version
+      run: |
+        echo ::set-output name=tag::$(echo "${GITHUB_REF}" | sed -e "s/refs\/tags\///g")
+
+    - name: gzip
+      run: |
+        mv dist i-am-lucien
+        tar -czvf dist.tar.gz i-am-lucien
+
+    - name: Upload to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        file: i-am-lucien-${{ steps.release_version.outputs.tag }}.tar.gz i-am-lucien
+    
+    - name: Trigger Webhook
+      run: |
+        curl -X POST "${{ secrets.WEBHOOK }}&param=${{ steps.release_version.outputs.tag }}"
