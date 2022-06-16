@@ -37,12 +37,12 @@ jobs:
     - name: gzip
       run: |
         mv dist i-am-lucien
-        tar -czvf dist.tar.gz i-am-lucien
+        tar -czvf i-am-lucien-${{ steps.release_version.outputs.tag }}.tar.gz i-am-lucien
 
     - name: Upload to release
       uses: svenstaro/upload-release-action@v2
       with:
-        file: i-am-lucien-${{ steps.release_version.outputs.tag }}.tar.gz i-am-lucien
+        file: i-am-lucien-${{ steps.release_version.outputs.tag }}.tar.gz
     
     - name: Trigger Webhook
       run: |
