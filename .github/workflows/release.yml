@@ -46,4 +46,4 @@ jobs:
     
     - name: Trigger Webhook
       run: |
-        curl -X POST "${{ secrets.WEBHOOK }}&param=${{ steps.release_version.outputs.tag }}"
+        curl -X POST "${{ secrets.WEBHOOK }}${{ steps.release_version.outputs.tag }}"
