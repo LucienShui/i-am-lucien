@@ -10,8 +10,7 @@
         <form id="chat-form" @submit.prevent="submit">
             <label for="chat-text" style="margin-right: .75em">$</label>
             <input id="chat-text" ref="chat-text" class="chat-input" spellcheck="false" v-model="text"
-                   onblur="this.focus()"
-                   autofocus>
+                   onblur="this.focus()" autofocus>
         </form>
     </div>
 </template>
@@ -22,7 +21,7 @@ import {Config, useStore} from "../store";
 
 class Message {
     public text: string;
-    public sender: number;
+    public sender: number; // 1 是用户，0 是机器人
     public createTime: number;
 
     constructor(text: string, sender: number, createTime: number = -1) {
@@ -40,51 +39,34 @@ class Message {
     }
 }
 
-const messageStorage = {
-    keepCount: 16,
-    storage_key: 'i-am-lucien-aGRj',
-    fetch: function () {
-        const messageList: Array<Message> = JSON.parse(localStorage.getItem(this.storage_key) || "[]").map(Message.fromJSON);
-        return messageList;
-    },
-    save(messageList: Array<Message>) {
-        let rawKeepCount: number = messageList.length;
-        let userCount: number = 0;
-        for (let i = messageList.length - 1; i >= 0; i--) {
-            let message: Message = messageList[i];
-            if (message.sender === 1 && ++userCount === this.keepCount) {
-                rawKeepCount = messageList.length - i;
-                break;
-            }
-        }
-        localStorage.setItem(this.storage_key, JSON.stringify(messageList.slice(-rawKeepCount)));
-    }
-};
-
 export default defineComponent({
     name: "chat",
     data: function () {
         return {
             text: '' as string,
             messageList: new Array<Message>(),
-            helloWorld: '如果一个机器人知我所知，想我所想，那他是否可以成为我。' as string,
             messageBox: document.createElement('div') as HTMLElement,
-            config: {} as Config
+            lastMessage: null as Message | null,
+            config: {} as Config,
+            history: [] as Array<Array<string>>,
+            websocket: null as WebSocket | null
         };
     },
     mounted: function () {
-        this.config = useStore().state.config;
-
-        this.messageBox = this.$refs["message-box"] as HTMLElement
-        this.messageList = messageStorage.fetch();
-        if (this.messageList.length === 0 || this.messageList[this.messageList.length - 1].text !== this.helloWorld) {
-            this.appendMessage(this.helloWorld, 0);
+        this.config =useStore().state.config;
+        this.messageBox = this.$refs["message-box"] as HTMLElement;
+        this.history = this.config.chat.history;
+        if (this.config.chat.api) {
+            if (this.config.chat.greeting && this.history.length > 0) {
+                this.updateMessage(this.history[this.history.length - 1][1], 0);
+            }
+            this.websocket = new WebSocket(this.config.chat.api);
+            this.websocket.onmessage = this.onmessage;
         }
     },
     watch: {
         messageList: {
             handler: function (messageList: Array<Message>) {
-                messageStorage.save(messageList);
                 this.messageBox.scrollTop = this.messageBox.scrollHeight;
             },
             flush: 'post',
@@ -93,20 +75,37 @@ export default defineComponent({
     },
     methods: {
         submit: function (event: Event) {
-            if (this.text !== '') {
+            if (this.text && this.lastMessage === null) { // 有输入且机器人不处于说话状态
                 let text = this.text;
                 this.text = '';
-
-                this.appendMessage(text, 1);
-                this.axios.post(this.config.chat.api, {'text': text}).then(response => response.data).then(response => {
-                    this.appendMessage(response.answer, 0);
-                })
+                if (this.websocket !== null) {
+                    let body = {"query": text, "history": this.history}
+                    this.websocket.send(JSON.stringify(body));
+                }
+                this.updateMessage(text, 1);
             }
             event.preventDefault();
         },
 
-        appendMessage: function (text: string, sender: number) {
-            this.messageList.push(new Message(text, sender));
+        onmessage: function (event: any) {
+            let body = JSON.parse(event.data);
+            let status = body['status']
+            if (status === 200) {  // 如果回答结束了
+                this.lastMessage = null;
+            } else {
+                this.history = body['history']
+                this.lastMessage = this.updateMessage(body['response'], 0, this.lastMessage);
+            }
+        },
+
+        updateMessage: function (text: string, sender: number, message: Message | null = null): Message {
+            if (message === null) {
+                message = new Message(text, sender);
+                this.messageList.push(message);
+            } else {
+                message.text = text;
+            }
+            return message;
         },
     }
 })

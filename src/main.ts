@@ -11,6 +11,7 @@ import NotFound from "./components/NotFound.vue";
 
 axios.get('/page/config.json').then(response => {
     let config: Config = response.data;
+    console.log(config);
 
     const store = createStore<State>({
         state: function () {
@@ -36,14 +37,14 @@ axios.get('/page/config.json').then(response => {
 
     const routes = [
         {
-            path: '/chat',
-            name: 'Chat',
-            component: Chat
-        },
-        {
             path: `/:page(${pattern === '' ? '|' : pattern})`,
             name: 'DynamicPage',
             component: DynamicPage
+        },
+        {
+            path: '/chat',
+            name: 'Chat',
+            component: Chat
         },
         {
             path: '/:notFoundPath(.*)*',
