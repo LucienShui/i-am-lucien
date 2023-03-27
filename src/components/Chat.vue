@@ -8,9 +8,14 @@
             <p v-for="message in messageList">{{ message.toString() }}</p>
         </div>
         <form id="chat-form" @submit.prevent="submit">
-            <label for="chat-text" style="margin-right: .75em">$</label>
-            <input id="chat-text" ref="chat-text" class="chat-input" spellcheck="false" v-model="text"
-                   onblur="this.focus()" autofocus>
+            <div id="text-box">
+                <textarea id="chat-text" ref="chat-text" class="chat-input" spellcheck="false"
+                          v-model="text" onblur="this.focus()" autofocus @keydown.enter.prevent="onKeyDown"></textarea>
+            </div>
+            <div style="text-align: right">
+                <a class="text-button" @click="clear">清空</a>
+                <a class="text-button" @click="submit">提交</a>
+            </div>
         </form>
     </div>
 </template>
@@ -35,7 +40,7 @@ class Message {
     }
 
     public toString() {
-        return (this.sender === 1 ? '> ' : '') + this.text;
+        return (this.sender === 1 ? '' : '> ') + this.text;
     }
 }
 
@@ -53,21 +58,22 @@ export default defineComponent({
         };
     },
     mounted: function () {
-        this.config =useStore().state.config;
+        this.config = useStore().state.config;
         this.messageBox = this.$refs["message-box"] as HTMLElement;
+
         this.history = this.config.chat.history;
         if (this.config.chat.api) {
             if (this.config.chat.greeting && this.history.length > 0) {
                 this.updateMessage(this.history[this.history.length - 1][1], 0);
             }
             this.websocket = new WebSocket(this.config.chat.api);
-            this.websocket.onmessage = this.onmessage;
+            this.websocket.onmessage = this.onMessage;
         }
     },
     watch: {
         messageList: {
             handler: function (messageList: Array<Message>) {
-                this.messageBox.scrollTop = this.messageBox.scrollHeight;
+                // this.messageBox.scrollTop = this.messageBox.scrollHeight;
             },
             flush: 'post',
             deep: true
@@ -77,17 +83,30 @@ export default defineComponent({
         submit: function (event: Event) {
             if (this.text && this.lastMessage === null) { // 有输入且机器人不处于说话状态
                 let text = this.text;
-                this.text = '';
                 if (this.websocket !== null) {
                     let body = {"query": text, "history": this.history}
                     this.websocket.send(JSON.stringify(body));
                 }
                 this.updateMessage(text, 1);
+                this.text = '';
             }
             event.preventDefault();
         },
 
-        onmessage: function (event: any) {
+        onKeyDown: function (event: any) {
+            if (event.ctrlKey == true) {
+                this.text += '\n';
+            } else {
+                this.submit(event);
+            }
+        },
+
+        clear: function () {
+            this.history = this.config.chat.history;
+            this.messageList = []
+        },
+
+        onMessage: function (event: any) {
             let body = JSON.parse(event.data);
             let status = body['status']
             if (status === 200) {  // 如果回答结束了
@@ -126,7 +145,7 @@ export default defineComponent({
 }
 
 #message-box {
-    height: 93.75px; /* 12.5px (font-size) x 1.5 (line-height) x 5 (line-number) */
+    /*height: 93.75px; !* 12.5px (font-size) x 1.5 (line-height) x 5 (line-number) *!*/
     overflow: scroll;
     position: relative;
 }
@@ -134,4 +153,30 @@ export default defineComponent({
 #message-box::-webkit-scrollbar {
     display: none;
 }
+
+#chat-text::-webkit-scrollbar {
+    display: none;
+}
+
+#chat-text {
+    margin-top: 1.5em;
+}
+
+#text-box {
+    color: #DBDBDB;
+    border-top: dashed 1px rgba(219, 219, 219, 0.9);
+    margin-top: 1em;
+    /*margin: 20px auto 15px;*/
+    /*padding-top: 10px;*/
+    /*text-align: right*/
+}
+
+.text-button {
+    margin-left: 1em;
+}
+
+.text-button:hover {
+    cursor: pointer;
+}
+
 </style>

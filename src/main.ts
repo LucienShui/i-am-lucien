@@ -11,7 +11,6 @@ import NotFound from "./components/NotFound.vue";
 
 axios.get('/page/config.json').then(response => {
     let config: Config = response.data;
-    console.log(config);
 
     const store = createStore<State>({
         state: function () {
