@@ -5,7 +5,7 @@
 <template>
     <div id="chat">
         <div id="message-box" ref="message-box">
-            <p v-for="message in messageList">{{ message.toString() }}</p>
+            <p v-for="message in messageList" class="chat-message">{{ message.toString() }}</p>
         </div>
         <form id="chat-form" @submit.prevent="submit">
             <div id="text-box">
@@ -14,7 +14,7 @@
             </div>
             <div style="text-align: right">
                 <a class="text-button" @click="clear">清空</a>
-                <a class="text-button" @click="submit">提交</a>
+                <a class="text-button" @click="submit">{{ socketReady ? "提交" : "未连接" }}</a>
             </div>
         </form>
     </div>
@@ -54,7 +54,8 @@ export default defineComponent({
             lastMessage: null as Message | null,
             config: {} as Config,
             history: [] as Array<Array<string>>,
-            websocket: null as WebSocket | null
+            websocket: null as WebSocket | null,
+            socketReady: false as boolean
         };
     },
     mounted: function () {
@@ -67,13 +68,15 @@ export default defineComponent({
                 this.updateMessage(this.history[this.history.length - 1][1], 0);
             }
             this.websocket = new WebSocket(this.config.chat.api);
-            this.websocket.onmessage = this.onMessage;
+            this.websocket.onmessage = this.onSocketMessage;
+            this.websocket.onopen = this.onSocketOpen;
+            this.websocket.onclose = this.onSocketClose;
         }
     },
     watch: {
         messageList: {
             handler: function (messageList: Array<Message>) {
-                // this.messageBox.scrollTop = this.messageBox.scrollHeight;
+                this.messageBox.scrollTop = this.messageBox.scrollHeight;
             },
             flush: 'post',
             deep: true
@@ -82,12 +85,11 @@ export default defineComponent({
     methods: {
         submit: function (event: Event) {
             if (this.text && this.lastMessage === null) { // 有输入且机器人不处于说话状态
-                let text = this.text;
-                if (this.websocket !== null) {
-                    let body = {"query": text, "history": this.history}
+                if (this.websocket !== null && this.websocket.readyState === 1) { // websocket 处于连接状态
+                    let body = {"query": this.text, "history": this.history}
                     this.websocket.send(JSON.stringify(body));
                 }
-                this.updateMessage(text, 1);
+                this.updateMessage(this.text, 1);
                 this.text = '';
             }
             event.preventDefault();
@@ -106,7 +108,15 @@ export default defineComponent({
             this.messageList = []
         },
 
-        onMessage: function (event: any) {
+        onSocketOpen: function (event: any) {
+            this.socketReady = true;
+        },
+
+        onSocketClose: function (event: any) {
+            this.socketReady = false;
+        },
+
+        onSocketMessage: function (event: any) {
             let body = JSON.parse(event.data);
             let status = body['status']
             if (status === 200) {  // 如果回答结束了
@@ -148,6 +158,7 @@ export default defineComponent({
     /*height: 93.75px; !* 12.5px (font-size) x 1.5 (line-height) x 5 (line-number) *!*/
     overflow: scroll;
     position: relative;
+    max-height: 60vh;
 }
 
 #message-box::-webkit-scrollbar {
@@ -177,6 +188,11 @@ export default defineComponent({
 
 .text-button:hover {
     cursor: pointer;
+}
+
+.chat-message {
+    margin-top: .5em;
+    margin-bottom: .5em;
 }
 
 </style>

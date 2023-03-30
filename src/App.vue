@@ -86,7 +86,7 @@ a:hover {
     width: 90%;
     max-width: 600px;
     margin-right: auto;
-    margin-left: auto
+    margin-left: auto;
 }
 
 p {
