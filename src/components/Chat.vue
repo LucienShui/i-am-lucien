@@ -5,10 +5,13 @@
 <template>
     <div id="chat">
         <div id="message-box" ref="message-box">
-            <p v-for="message in messageList" class="chat-message">{{ message.toString() }}</p>
+            <div v-for="(message, index) in messageList" class="chat-message">
+                <hr class="message-line" v-if="message.sender === sender.user && index > 0">
+                <p>{{ message.toString() }}</p>
+            </div>
         </div>
         <form id="chat-form" @submit.prevent="submit">
-            <div id="text-box">
+            <div :class="messageList.length > 0 ? 'text-box' : ''">
                 <textarea id="chat-text" ref="chat-text" class="chat-input" spellcheck="false"
                           v-model="text" onblur="this.focus()" autofocus @keydown.enter.prevent="onKeyDown"></textarea>
             </div>
@@ -23,6 +26,11 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 import {Config, useStore} from "../store";
+
+let senderEnum = {
+    bot: 0 as number,
+    user: 1 as number
+}
 
 class Message {
     public text: string;
@@ -40,9 +48,10 @@ class Message {
     }
 
     public toString() {
-        return (this.sender === 1 ? '' : '> ') + this.text;
+        return (this.sender === senderEnum.user ? '' : '> ') + this.text;
     }
 }
+
 
 export default defineComponent({
     name: "chat",
@@ -55,7 +64,8 @@ export default defineComponent({
             config: {} as Config,
             history: [] as Array<Array<string>>,
             websocket: null as WebSocket | null,
-            socketReady: false as boolean
+            socketReady: false as boolean,
+            sender: senderEnum
         };
     },
     mounted: function () {
@@ -88,9 +98,10 @@ export default defineComponent({
                 if (this.websocket !== null && this.websocket.readyState === 1) { // websocket 处于连接状态
                     let body = {"query": this.text, "history": this.history}
                     this.websocket.send(JSON.stringify(body));
+
+                    this.updateMessage(this.text, this.sender.user);
+                    this.text = '';
                 }
-                this.updateMessage(this.text, 1);
-                this.text = '';
             }
             event.preventDefault();
         },
@@ -123,7 +134,7 @@ export default defineComponent({
                 this.lastMessage = null;
             } else {
                 this.history = body['history']
-                this.lastMessage = this.updateMessage(body['response'], 0, this.lastMessage);
+                this.lastMessage = this.updateMessage(body['response'], this.sender.bot, this.lastMessage);
             }
         },
 
@@ -173,7 +184,7 @@ export default defineComponent({
     margin-top: 1.5em;
 }
 
-#text-box {
+.text-box {
     color: #DBDBDB;
     border-top: dashed 1px rgba(219, 219, 219, 0.9);
     margin-top: 1em;
@@ -190,9 +201,18 @@ export default defineComponent({
     cursor: pointer;
 }
 
+/*
 .chat-message {
     margin-top: .5em;
     margin-bottom: .5em;
 }
+ */
 
+.message-line {
+    border-top: dashed 1px rgba(219, 219, 219, 0.9);
+    border-bottom: none;
+    color: #DBDBDB;
+    /*width: 30%;*/
+    /*margin-inline-start: 0;*/
+}
 </style>
