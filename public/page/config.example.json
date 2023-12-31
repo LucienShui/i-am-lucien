@@ -6,6 +6,10 @@
         }
     ],
     "chat": {
-        "api": ""
+        "base_url": "",
+        "api_key": "",
+        "model": "",
+        "history": [],
+        "greeting": false
     }
 }

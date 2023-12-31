@@ -17,7 +17,7 @@
             </div>
             <div style="text-align: right">
                 <a class="text-button" @click="clear">清空</a>
-                <a class="text-button" @click="submit">{{ socketReady ? "提交" : "未连接" }}</a>
+                <a class="text-button" @click="submit">提交</a>
             </div>
         </form>
     </div>
@@ -26,8 +26,9 @@
 <script lang="ts">
 import {defineComponent} from "vue";
 import {Config, useStore} from "../store";
+import OpenAI from "openai";
 
-let senderEnum = {
+const senderEnum = {
     bot: 0 as number,
     user: 1 as number
 }
@@ -63,8 +64,7 @@ export default defineComponent({
             lastMessage: null as Message | null,
             config: {} as Config,
             history: [] as Array<Array<string>>,
-            websocket: null as WebSocket | null,
-            socketReady: false as boolean,
+            openai: null as OpenAI | null,
             sender: senderEnum
         };
     },
@@ -73,14 +73,15 @@ export default defineComponent({
         this.messageBox = this.$refs["message-box"] as HTMLElement;
 
         this.history = this.config.chat.history;
-        if (this.config.chat.api) {
+        if (this.config.chat.api_key) {
             if (this.config.chat.greeting && this.history.length > 0) {
                 this.updateMessage(this.history[this.history.length - 1][1], 0);
             }
-            this.websocket = new WebSocket(this.config.chat.api);
-            this.websocket.onmessage = this.onSocketMessage;
-            this.websocket.onopen = this.onSocketOpen;
-            this.websocket.onclose = this.onSocketClose;
+            this.openai = new OpenAI({
+                apiKey: this.config.chat.api_key,
+                baseURL: this.config.chat.base_url,
+                dangerouslyAllowBrowser: true
+            });
         }
     },
     watch: {
@@ -93,21 +94,38 @@ export default defineComponent({
         }
     },
     methods: {
-        submit: function (event: Event) {
-            if (this.text && this.lastMessage === null) { // 有输入且机器人不处于说话状态
-                if (this.websocket !== null && this.websocket.readyState === 1) { // websocket 处于连接状态
-                    let body = {"query": this.text, "history": this.history}
-                    this.websocket.send(JSON.stringify(body));
-
-                    this.updateMessage(this.text, this.sender.user);
-                    this.text = '';
+        submit: async function (event: Event) {
+            if (this.text && this.lastMessage === null && this.openai !== null) { // 有输入且机器人不处于说话状态
+                this.history = this.history || [];
+                let messages = []
+                for (let i = 0; i < this.history.length; i++) {
+                    messages.push({role: 'user', content: this.history[i][0]})
+                    messages.push({role: 'assistant', content: this.history[i][1]})
                 }
+                messages.push({role: 'user', content: this.text})
+
+                this.history.push([this.text])
+                this.updateMessage(this.text, this.sender.user);
+                this.text = '';
+
+                let body = {model: this.config.chat.model, messages: messages, stream: true};
+                let stream = await this.openai.chat.completions.create(body);
+                let response = '';
+
+                for await (let chunk of stream) {
+                    let delta = chunk.choices[0]?.delta?.content || ''
+                    response += delta;
+                    this.lastMessage = this.updateMessage(response, this.sender.bot, this.lastMessage);
+                }
+
+                this.history[this.history.length - 1].push(response)
+                this.lastMessage = null;
             }
             event.preventDefault();
         },
 
         onKeyDown: function (event: any) {
-            if (event.ctrlKey == true) {
+            if (event.ctrlKey == true || event.shiftKey == true) {
                 this.text += '\n';
             } else {
                 this.submit(event);
@@ -115,28 +133,12 @@ export default defineComponent({
         },
 
         clear: function () {
-            this.history = this.config.chat.history;
-            this.messageList = []
-        },
-
-        onSocketOpen: function (event: any) {
-            this.socketReady = true;
-        },
-
-        onSocketClose: function (event: any) {
-            this.socketReady = false;
-        },
-
-        onSocketMessage: function (event: any) {
-            let body = JSON.parse(event.data);
-            let status = body['status']
-            if (status === 200) {  // 如果回答结束了
-                this.lastMessage = null;
-            } else {
-                this.history = body['history']
-                this.lastMessage = this.updateMessage(body['response'], this.sender.bot, this.lastMessage);
+            if (this.lastMessage === null) {
+                this.history = this.config.chat.history;
+                this.messageList = [];
             }
         },
+
 
         updateMessage: function (text: string, sender: number, message: Message | null = null): Message {
             if (message === null) {

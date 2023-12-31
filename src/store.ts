@@ -3,7 +3,13 @@ import {Store, useStore as baseUseStore} from 'vuex'
 
 export interface Config {
     header: Array<{ url: string, path: string }>,
-    chat: { api: string, history: Array<Array<string>>, greeting: boolean }
+    chat: {
+        base_url: string,
+        api_key: string,
+        history: Array<Array<string>>,
+        model: string,
+        greeting: boolean
+    }
 }
 
 export interface Cache {

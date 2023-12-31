@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.27.2",
+    "openai": "^4.24.1",
     "vue": "^3.2.25",
     "vue-axios": "^3.4.1",
     "vue-router": "4",
