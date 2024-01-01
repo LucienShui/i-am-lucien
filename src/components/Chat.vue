@@ -72,17 +72,16 @@ export default defineComponent({
         this.config = useStore().state.config;
         this.messageBox = this.$refs["message-box"] as HTMLElement;
 
-        this.history = this.config.chat.history;
-        if (this.config.chat.api_key) {
-            if (this.config.chat.greeting && this.history.length > 0) {
-                this.updateMessage(this.history[this.history.length - 1][1], 0);
-            }
-            this.openai = new OpenAI({
-                apiKey: this.config.chat.api_key,
-                baseURL: this.config.chat.base_url,
-                dangerouslyAllowBrowser: true
-            });
+        this.clear()
+
+        if (this.config.chat.greeting && this.history.length > 0) {
+            this.updateMessage(this.history[this.history.length - 1][1], 0);
         }
+        this.openai = new OpenAI({
+            apiKey: this.config.chat.api_key,
+            baseURL: this.config.chat.base_url,
+            dangerouslyAllowBrowser: true
+        });
     },
     watch: {
         messageList: {
@@ -134,7 +133,7 @@ export default defineComponent({
 
         clear: function () {
             if (this.lastMessage === null) {
-                this.history = this.config.chat.history;
+                this.history = this.config.chat.history.slice();
                 this.messageList = [];
             }
         },

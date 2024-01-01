@@ -10,7 +10,7 @@
                     <router-link v-bind:to="page.url">{{ page.url }}</router-link>
                 </li>
                 <li>
-                    <router-link to="/chat" v-show="config.chat.api_key!== ''">/chat</router-link>
+                    <router-link to="/chat" v-show="config.chat.api_key !== ''">/chat</router-link>
                 </li>
             </ul>
         </header>
