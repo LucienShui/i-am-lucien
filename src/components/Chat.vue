@@ -97,7 +97,7 @@ export default defineComponent({
         submit: async function (event: Event) {
             if (this.text && this.lastMessage === null && this.openai !== null) { // 有输入且机器人不处于说话状态
                 this.history = this.history || [];
-                let messages = []
+                let messages: Array<OpenAI.Chat.ChatCompletionMessageParam> = []
                 for (let i = 0; i < this.history.length; i++) {
                     messages.push({role: 'user', content: this.history[i][0]})
                     messages.push({role: 'assistant', content: this.history[i][1]})
@@ -108,7 +108,7 @@ export default defineComponent({
                 this.updateMessage(this.text, this.sender.user);
                 this.text = '';
 
-                let body = {model: this.config.chat.model, messages: messages, stream: true};
+                let body: OpenAI.Chat.ChatCompletionCreateParams = {model: this.config.chat.model, messages: messages, stream: true};
                 let stream = await this.openai.chat.completions.create(body);
                 let response = '';
 
