@@ -45,7 +45,7 @@ jobs:
       - name: Build
         run: pnpm build --outDir _site
       - name: Post processing
-        run: rm _site/page/example.html && mv _site/page/config.example.json _site/page/config.json
+        run: [ ! -f _site/page/config.json ] && mv _site/page/config.example.json _site/page/config.json || true
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
