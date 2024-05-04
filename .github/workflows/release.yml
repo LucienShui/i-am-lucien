@@ -43,7 +43,3 @@ jobs:
       uses: svenstaro/upload-release-action@v2
       with:
         file: i-am-lucien-${{ steps.release_version.outputs.tag }}.tar.gz
-    
-    - name: Trigger Webhook
-      run: |
-        curl -k -X POST "${{ secrets.WEBHOOK }}${{ steps.release_version.outputs.tag }}"

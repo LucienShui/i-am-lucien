@@ -63,7 +63,7 @@ export default defineComponent({
             messageBox: document.createElement('div') as HTMLElement,
             lastMessage: null as Message | null,
             config: {} as Config,
-            history: [] as Array<Array<string>>,
+            messages: [] as Array<OpenAI.Chat.ChatCompletionMessageParam>,
             openai: null as OpenAI | null,
             sender: senderEnum
         };
@@ -72,11 +72,8 @@ export default defineComponent({
         this.config = useStore().state.config;
         this.messageBox = this.$refs["message-box"] as HTMLElement;
 
-        this.clear()
+        this.clear();
 
-        if (this.config.chat.greeting && this.history.length > 0) {
-            this.updateMessage(this.history[this.history.length - 1][1], 0);
-        }
         this.openai = new OpenAI({
             apiKey: this.config.chat.api_key,
             baseURL: this.config.chat.base_url,
@@ -95,29 +92,27 @@ export default defineComponent({
     methods: {
         submit: async function (event: Event) {
             if (this.text && this.lastMessage === null && this.openai !== null) { // 有输入且机器人不处于说话状态
-                this.history = this.history || [];
-                let messages: Array<OpenAI.Chat.ChatCompletionMessageParam> = []
-                for (let i = 0; i < this.history.length; i++) {
-                    messages.push({role: 'user', content: this.history[i][0]})
-                    messages.push({role: 'assistant', content: this.history[i][1]})
-                }
-                messages.push({role: 'user', content: this.text})
+                this.messages = this.messages || [];
+                this.messages.push({role: "user", content: this.text});
 
-                this.history.push([this.text])
                 this.updateMessage(this.text, this.sender.user);
                 this.text = '';
 
-                let body: OpenAI.Chat.ChatCompletionCreateParams = {model: this.config.chat.model, messages: messages, stream: true};
+                let body: OpenAI.Chat.ChatCompletionCreateParams = {
+                    model: this.config.chat.model,
+                    messages: this.messages,
+                    stream: true
+                };
                 let stream = await this.openai.chat.completions.create(body);
                 let response = '';
 
                 for await (let chunk of stream) {
-                    let delta = chunk.choices[0]?.delta?.content || ''
+                    let delta = chunk.choices[0]?.delta?.content || '';
                     response += delta;
                     this.lastMessage = this.updateMessage(response, this.sender.bot, this.lastMessage);
                 }
 
-                this.history[this.history.length - 1].push(response)
+                this.messages.push({role: "assistant", content: response});
                 this.lastMessage = null;
             }
             event.preventDefault();
@@ -133,11 +128,10 @@ export default defineComponent({
 
         clear: function () {
             if (this.lastMessage === null) {
-                this.history = this.config.chat.history.slice();
+                this.messages = this.config.chat.messages.slice();
                 this.messageList = [];
             }
         },
-
 
         updateMessage: function (text: string, sender: number, message: Message | null = null): Message {
             if (message === null) {
