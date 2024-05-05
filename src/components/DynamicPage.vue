@@ -24,14 +24,14 @@ export default defineComponent({
         hasCache: function (namespace: string, key: string): boolean {
             return namespace in this.store.state.cache && key in this.store.state.cache[namespace];
         },
-        loadPage: function (page: string, callback: any) {
+        loadPage: function (page: string, callback?: (html: string) => void) {
             if (!(page in this.page)) {
                 return
             }
             let url = this.page[page];
             let namespace: string = 'page';
             if (this.hasCache(namespace, url)) {
-                callback(this.store.state.cache[namespace][url]);
+                callback?.(this.store.state.cache[namespace][url]);
             } else {
                 this.axios.get(url).then(response => response.data).then(html => {
                     this.store.commit({
@@ -40,10 +40,10 @@ export default defineComponent({
                         key: url,
                         value: html
                     });
-                    callback(html);
+                    callback?.(html);
                 }).catch(error => {
                     if (error.response.status === 404) {
-                        callback(`请求的页面 ${url} 不存在`)
+                        callback?.(`请求的页面 ${url} 不存在`)
                     }
                 })
             }
@@ -62,11 +62,12 @@ export default defineComponent({
     mounted: function () {
         this.config = this.store.state.config;
         for (let page of this.config.header) {
-            this.page[page.url] = page.path;
+            if (!page.path.startsWith('redirect:')) {
+                this.page[page.url] = page.path;
+            }
         }
         this.loadPage(`/${this.$route.params.page}`, this.updatePageCallback);
-        this.config.header.forEach(page => this.loadPage(page.url, function () {
-        }))
+        Array.from(Object.values(this.page)).forEach(each => this.loadPage(each))
     }
 });
 </script>

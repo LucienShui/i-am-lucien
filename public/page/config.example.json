@@ -3,13 +3,16 @@
         {
             "url": "/",
             "path": "/page/example.html"
+        },
+        {
+            "url": "/baidu",
+            "path": "redirect:https://www.baidu.com"
         }
     ],
     "chat": {
         "base_url": "",
         "api_key": "",
         "model": "",
-        "messages": [],
-        "greeting": false
+        "messages": []
     }
 }

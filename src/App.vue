@@ -7,10 +7,15 @@
         <header id="container-header" class="menu">
             <ul>
                 <li v-for="page in config.header">
-                    <router-link v-bind:to="page.url">{{ page.url }}</router-link>
+                    <a
+                        v-if="page.path.startsWith('redirect:')"
+                        :href="page.path.replace('redirect:', '')"
+                        target="_blank"
+                    >{{ page.url }}</a>
+                    <router-link v-else v-bind:to="page.url">{{ page.url }}</router-link>
                 </li>
-                <li>
-                    <router-link to="/chat" v-show="config.chat.api_key !== ''">/chat</router-link>
+                <li v-show="config.chat.api_key !== ''">
+                    <router-link to="/chat">/chat</router-link>
                 </li>
             </ul>
         </header>
