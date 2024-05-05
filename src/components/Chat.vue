@@ -5,9 +5,9 @@
 <template>
     <div id="chat">
         <div id="message-box" ref="message-box">
-            <div v-for="(message, index) in messageList" class="chat-message">
+            <div v-for="(message, index) in messageList">
                 <hr class="message-line" v-if="message.sender === sender.user && index > 0">
-                <p>{{ message.toString() }}</p>
+                <p :class="{'user-message': message.sender === sender.user}">{{ message.toString() }}</p>
             </div>
         </div>
         <form id="chat-form" @submit.prevent="submit">
@@ -42,10 +42,6 @@ class Message {
         this.text = text;
         this.sender = sender;
         this.createTime = createTime === -1 ? Date.now() : createTime;
-    }
-
-    static fromJSON(json: Message): Message {
-        return new Message(json.text, json.sender, json.createTime);
     }
 
     public toString() {
@@ -152,7 +148,7 @@ export default defineComponent({
     color: #DBDBDB;
     caret-color: #DBDBDB;
     font-family: "Source Code Pro", monospace;
-    font-size: 12.5px;
+    font-size: 13px;
 }
 
 .chat-input > span {
@@ -161,7 +157,6 @@ export default defineComponent({
 }
 
 #message-box {
-    /*height: 93.75px; !* 12.5px (font-size) x 1.5 (line-height) x 5 (line-number) *!*/
     overflow: scroll;
     position: relative;
     max-height: 60vh;
@@ -196,18 +191,13 @@ export default defineComponent({
     cursor: pointer;
 }
 
-/*
-.chat-message {
-    margin-top: .5em;
-    margin-bottom: .5em;
-}
- */
-
 .message-line {
     border-top: dashed 1px rgba(219, 219, 219, 0.9);
     border-bottom: none;
     color: #DBDBDB;
-    /*width: 30%;*/
-    /*margin-inline-start: 0;*/
+}
+
+.user-message {
+    color: #A9A9A9;
 }
 </style>
