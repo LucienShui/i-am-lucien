@@ -14,7 +14,7 @@
                     >{{ page.url }}</a>
                     <router-link v-else v-bind:to="page.url">{{ page.url }}</router-link>
                 </li>
-                <li v-show="config.chat.api_key !== ''">
+                <li>
                     <router-link to="/chat">/chat</router-link>
                 </li>
             </ul>

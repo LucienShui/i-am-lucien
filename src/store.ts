@@ -1,13 +1,17 @@
 import {InjectionKey} from 'vue'
 import {Store, useStore as baseUseStore} from 'vuex'
-import OpenAI from "openai";
+
+export interface ChatMessage {
+    role: "system" | "user" | "assistant",
+    content: string
+}
 
 export interface Config {
     header: Array<{ url: string, path: string }>,
     chat: {
         base_url: string,
         api_key: string,
-        messages: Array<OpenAI.Chat.ChatCompletionMessageParam>,
+        messages: Array<ChatMessage>,
         model: string,
         greeting: boolean
     }
